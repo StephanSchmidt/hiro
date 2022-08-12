@@ -15,15 +15,15 @@ type HiroAst struct {
 type Function struct {
 	Name   string     `"fn" @Ident`
 	Args   []*Arg     `"(" ( @@ ( "," @@ )* )? ")"`
-	Return string     `("-" ">" @Ident)?`
-	Body   []*Command `":" @@* "end"`
+	Return string     `("-" ">" @Ident)? ":" EOL`
+	Body   []*Command `@@* "end" EOL`
 }
 
 type Command struct {
 	Pos        lexer.Position
-	Print      *Print      `( @@ `
-	Call       *Call       `| @@ `
-	Expression *Expression `| @@ )`
+	Print      *Print `(@@ `
+	Call       *Call
+	Expression *Expression `| @@ ) EOL`
 }
 
 type Call struct {
@@ -35,7 +35,7 @@ type Call struct {
 
 type Print struct {
 	Pos        lexer.Position
-	Expression *Expression `"print" @@`
+	Expression string `"print" @String`
 }
 
 type Arg struct {

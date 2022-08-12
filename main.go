@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/alecthomas/participle/v2"
+	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/davecgh/go-spew/spew"
 	"os"
 	"strconv"
@@ -12,7 +13,7 @@ import (
 func visitCommand(sb *strings.Builder, c *Command) {
 	if c.Print != nil {
 		sb.WriteString("fmt.Println(")
-		visitExpression(sb, c.Print.Expression)
+		sb.WriteString(c.Print.Expression)
 		sb.WriteString(")\n")
 	}
 	if c.Expression != nil {
@@ -110,7 +111,23 @@ func visitExpression(sb *strings.Builder, e *Expression) {
 }
 
 func main() {
-	parser, err := participle.Build[HiroAst]()
+	basicLexer := lexer.MustSimple([]lexer.SimpleRule{
+		{"Comment", `(?i)rem[^\n]*`},
+		{"String", `"(\\"|[^"])*"`},
+		{"Number", `[-+]?(\d*\.)?\d+`},
+		{"Int", `[-+]?\d+`},
+		{"Ident", `[a-zA-Z_]\w*`},
+		{"Punct", `[-[!@#$%^&*()+_={}\|:;"'<,>.?/]|]`},
+		{"EOL", `[\n\r]+`},
+		{"whitespace", `[ \t]+`},
+	})
+
+	parser, err := participle.Build[HiroAst](
+		participle.Lexer(basicLexer),
+		//	participle.CaseInsensitive("Ident"),
+		participle.Unquote("String"),
+		participle.UseLookahead(2),
+	)
 	if err != nil {
 		panic(err)
 	}
