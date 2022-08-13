@@ -1,8 +1,10 @@
 fn add(a:int, b:int) -> int:
 	print "hello"
 	print "hello"
+	3+2
 end
 
 fn main():
+    add(3+2,2)
 	print "hello"
 end

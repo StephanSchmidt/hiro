@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/alecthomas/participle/v2"
-	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/davecgh/go-spew/spew"
 	"os"
 	"strconv"
@@ -14,13 +13,16 @@ func visitCommand(sb *strings.Builder, c *Command) {
 	if c.Print != nil {
 		sb.WriteString("fmt.Println(")
 		sb.WriteString(c.Print.Expression)
-		sb.WriteString(")\n")
+		sb.WriteString(")")
+		sb.WriteString("\n")
 	}
 	if c.Expression != nil {
 		visitExpression(sb, c.Expression)
+		sb.WriteString("\n")
 	}
 	if c.Call != nil {
 		visitCall(sb, c.Call)
+		sb.WriteString("\n")
 	}
 }
 
@@ -28,6 +30,7 @@ func visitCall(sb *strings.Builder, c *Call) {
 	sb.WriteString(c.Name)
 	sb.WriteString("(")
 	for i, par := range c.Args {
+		//sb.WriteString(par)
 		visitExpression(sb, par)
 		if i < len(c.Args)-1 {
 			sb.WriteString(",")
@@ -36,98 +39,85 @@ func visitCall(sb *strings.Builder, c *Call) {
 	sb.WriteString(")\n")
 }
 
-func visitOpCmp(sb *strings.Builder, o *OpCmp) {
-	sb.WriteString(string(o.Operator))
-	visitCmp(sb, o.Cmp)
-}
-
-func visitCmp(sb *strings.Builder, c *Cmp) {
-	if c.Left != nil {
-		visitTerm(sb, c.Left)
+func visitPrimary(sb *strings.Builder, p *Primary) {
+	if p.String != nil {
+		sb.WriteString(*p.String)
 	}
-	if c.Right != nil {
-		for _, ot := range c.Right {
-			visitOpTerm(sb, ot)
-		}
+	if p.Float != nil {
+		sb.WriteString(strconv.FormatFloat(3.1415, 'E', -1, 64))
 	}
-}
-
-func visitValue(sb *strings.Builder, v *Value) {
-
-	if v.Variable != nil {
-		sb.WriteString(*v.Variable)
+	if p.Int != nil {
+		sb.WriteString(strconv.Itoa(*p.Int))
 	}
-	if v.String != nil {
-		sb.WriteString(*v.String)
-	}
-	if v.Number != nil {
-		sb.WriteString(strconv.Itoa(*v.Number))
-	}
-	if v.Subexpression != nil {
+	if p.SubExpression != nil {
 		sb.WriteString("(")
-		visitExpression(sb, v.Subexpression)
+		visitExpression(sb, p.SubExpression)
 		sb.WriteString(")")
 	}
 }
 
-func visitFactor(sb *strings.Builder, f *Factor) {
-	if f.Base != nil {
-		visitValue(sb, f.Base)
+func visitUnary(sb *strings.Builder, u *Unary) {
+	sb.WriteString(u.Op)
+	if u.Unary != nil {
+		visitUnary(sb, u.Unary)
 	}
-	if f.Exponent != nil {
-		sb.WriteString("^")
-		visitValue(sb, f.Exponent)
+	visitPrimary(sb, u.Primary)
+}
+
+func visitMultiplication(sb *strings.Builder, m *Multiplication) {
+	if m.Unary != nil {
+		visitUnary(sb, m.Unary)
+	}
+	sb.WriteString(m.Op)
+	if m.Next != nil {
+		visitMultiplication(sb, m.Next)
 	}
 }
 
-func visitOpFactor(sb *strings.Builder, of *OpFactor) {
-}
-
-func visitTerm(sb *strings.Builder, t *Term) {
-	if t.Left != nil {
-		visitFactor(sb, t.Left)
-	}
-	if t.Right != nil {
-		for _, of := range t.Right {
-			visitOpFactor(sb, of)
-		}
+func visitAddition(sb *strings.Builder, a *Addition) {
+	visitMultiplication(sb, a.Multiplication)
+	sb.WriteString(a.Op)
+	if a.Next != nil {
+		visitAddition(sb, a.Next)
 	}
 }
 
-func visitOpTerm(sb *strings.Builder, o *OpTerm) {
-	sb.WriteString(string(o.Operator))
-	visitTerm(sb, o.Term)
+func visitComparison(sb *strings.Builder, c *Comparison) {
+	visitAddition(sb, c.Addition)
+	sb.WriteString(c.Op)
+	if c.Next != nil {
+		visitComparison(sb, c.Next)
+	}
+
+}
+
+func visitEquality(sb *strings.Builder, e *Equality) {
+	visitComparison(sb, e.Comparison)
+	sb.WriteString(e.Op)
+	if e.Next != nil {
+		visitEquality(sb, e.Next)
+	}
 }
 
 func visitExpression(sb *strings.Builder, e *Expression) {
-	if e.Left != nil {
-		visitCmp(sb, e.Left)
-	}
-	if e.Right != nil {
-		for _, o := range e.Right {
-			visitOpCmp(sb, o)
-		}
+	if e.Equality != nil {
+		visitEquality(sb, e.Equality)
 	}
 }
 
 func main() {
-	basicLexer := lexer.MustSimple([]lexer.SimpleRule{
-		{"Comment", `(?i)rem[^\n]*`},
-		{"String", `"(\\"|[^"])*"`},
-		{"Number", `[-+]?(\d*\.)?\d+`},
-		{"Int", `[-+]?\d+`},
-		{"Ident", `[a-zA-Z_]\w*`},
-		{"Punct", `[-[!@#$%^&*()+_={}\|:;"'<,>.?/]|]`},
-		{"EOL", `[\n\r]+`},
-		{"whitespace", `[ \t]+`},
-	})
+	//basicLexer := lexer.MustSimple([]lexer.SimpleRule{
+	//	{"Comment", `(?i)rem[^\n]*`},
+	//	{"Int", `[-+]?\d+`},
+	//	{"String", `"(\\"|[^"])+"`},
+	//	{"Number", `[-+]?(\d*\.)?\d+`},
+	//	{"Ident", `[a-zA-Z_]\w*`},
+	//	{"Punct", `[-[!@#$%^&*()+_={}\|:;"'<,>.?/]|]`},
+	//	{"EOL", `[\n\r]+`},
+	//	{"whitespace", `[ \t]+`},
+	//})
 
-	parser, err := participle.Build[HiroAst](
-		participle.Lexer(basicLexer),
-		//	participle.CaseInsensitive("Ident"),
-		participle.Unquote("String"),
-		participle.UseLookahead(2),
-	)
+	var parser, err = participle.Build[HiroAst](participle.UseLookahead(2))
 	if err != nil {
 		panic(err)
 	}
@@ -138,6 +128,7 @@ func main() {
 	}
 	hiro, err := parser.ParseString("", string(dat))
 	if err != nil {
+		spew.Dump(hiro)
 		panic(err)
 	} else {
 		spew.Dump(hiro)
@@ -165,15 +156,12 @@ func main() {
 			}
 			sb.WriteString(fmt.Sprintf(`) %s {`, fu.Return))
 			sb.WriteString("\n")
-			lastCommand := fu.Body[len(fu.Body)-1]
-			if lastCommand.Expression != nil {
-				sb.WriteString("return ")
-			}
-			for _, c := range fu.Body {
+			for index, c := range fu.Body {
+				if index == len(fu.Body)-2 && c.Expression != nil {
+					sb.WriteString("return ")
+
+				}
 				visitCommand(&sb, c)
-			}
-			if fu.Name == "main" {
-				sb.WriteString("fmt.Println(\"End\")\n")
 			}
 			sb.WriteString("}\n")
 		}

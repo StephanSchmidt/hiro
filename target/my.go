@@ -4,9 +4,12 @@ import (
 	"fmt")
 
 func add(a int, b int) int {
-fmt.Println(hello)
+fmt.Println("hello")
+fmt.Println("hello")
+return 3+2
 }
 func main()  {
-fmt.Println(hello)
-fmt.Println("End")
+add(3+2,2)
+
+fmt.Println("hello")
 }

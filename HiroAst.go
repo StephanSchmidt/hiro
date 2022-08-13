@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/alecthomas/participle/v2/lexer"
-	"strings"
 )
 
 // BASIC example
@@ -15,21 +14,24 @@ type HiroAst struct {
 type Function struct {
 	Name   string     `"fn" @Ident`
 	Args   []*Arg     `"(" ( @@ ( "," @@ )* )? ")"`
-	Return string     `("-" ">" @Ident)? ":" EOL`
-	Body   []*Command `@@* "end" EOL`
+	Return string     `("-" ">" @Ident)? ":"`
+	Body   []*Command `@@*`
 }
 
 type Command struct {
-	Pos        lexer.Position
-	Print      *Print `(@@ `
-	Call       *Call
-	Expression *Expression `| @@ ) EOL`
+	Pos lexer.Position
+
+	End        bool        `( @"end"`
+	Print      *Print      `  | @@`
+	Call       *Call       `  | @@`
+	Expression *Expression `| @@ )`
 }
 
 type Call struct {
 	Pos lexer.Position
 
-	Name string        `@Ident`
+	Name string `@Ident`
+	//Args []string `"(" ( @String ( "," @String )* )? ")"`
 	Args []*Expression `"(" ( @@ ( "," @@ )* )? ")"`
 }
 
@@ -46,67 +48,45 @@ type Arg struct {
 
 // Expressions
 
-type Operator string
-
-func (o *Operator) Capture(s []string) error {
-	*o = Operator(strings.Join(s, ""))
-	return nil
-}
-
-type Value struct {
-	Pos lexer.Position
-
-	Variable      *string     `  @Ident`
-	String        *string     `| @String`
-	Number        *int        `| @Int`
-	Subexpression *Expression `| "(" @@ ")"`
-}
-
-type Factor struct {
-	Pos lexer.Position
-
-	Base     *Value `@@`
-	Exponent *Value `( "^" @@ )?`
-}
-
-type OpFactor struct {
-	Pos lexer.Position
-
-	Operator Operator `@("*" | "/")`
-	Factor   *Factor  `@@`
-}
-
-type Term struct {
-	Pos lexer.Position
-
-	Left  *Factor     `@@`
-	Right []*OpFactor `@@*`
-}
-
-type OpTerm struct {
-	Pos lexer.Position
-
-	Operator Operator `@("+" | "-")`
-	Term     *Term    `@@`
-}
-
-type Cmp struct {
-	Pos lexer.Position
-
-	Left  *Term     `@@`
-	Right []*OpTerm `@@*`
-}
-
-type OpCmp struct {
-	Pos lexer.Position
-
-	Operator Operator `@("=" | "<" "=" | ">" "=" | "<" | ">" | "!" "=")`
-	Cmp      *Cmp     `@@`
-}
-
 type Expression struct {
-	Pos lexer.Position
+	Equality *Equality `@@`
+}
 
-	Left  *Cmp     `@@`
-	Right []*OpCmp `@@*`
+type Equality struct {
+	Comparison *Comparison `@@`
+	Op         string      `[ @( "!" "=" | "=" "=" )`
+	Next       *Equality   `  @@ ]`
+}
+
+type Comparison struct {
+	Addition *Addition   `@@`
+	Op       string      `[ @( ">" | ">" "=" | "<" | "<" "=" )`
+	Next     *Comparison `  @@ ]`
+}
+
+type Addition struct {
+	Multiplication *Multiplication `@@`
+	Op             string          `[ @( "-" | "+" )`
+	Next           *Addition       `  @@ ]`
+}
+
+type Multiplication struct {
+	Unary *Unary          `@@`
+	Op    string          `[ @( "/" | "*" )`
+	Next  *Multiplication `  @@ ]`
+}
+
+type Unary struct {
+	Op      string   `  ( @( "!" | "-" )`
+	Unary   *Unary   `    @@ )`
+	Primary *Primary `| @@`
+}
+
+type Primary struct {
+	Float         *float64    `  @Float`
+	Int           *int        ` | @Int`
+	String        *string     `| @String`
+	Bool          *bool       `| ( @"true" | "false" )`
+	Nil           bool        `| @"nil"`
+	SubExpression *Expression `| "(" @@ ")" `
 }
