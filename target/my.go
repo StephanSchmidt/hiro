@@ -5,7 +5,6 @@ import (
 
 func add(a int, b int) int {
 fmt.Println("hello")
-fmt.Println("hello")
 return 3+2
 }
 func main()  {

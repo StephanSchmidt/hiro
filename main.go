@@ -119,6 +119,7 @@ func main() {
 
 	var parser, err = participle.Build[HiroAst](participle.UseLookahead(2))
 	if err != nil {
+		fmt.Println("Can't parse grammar.")
 		panic(err)
 	}
 
@@ -157,7 +158,7 @@ func main() {
 			sb.WriteString(fmt.Sprintf(`) %s {`, fu.Return))
 			sb.WriteString("\n")
 			for index, c := range fu.Body {
-				if index == len(fu.Body)-2 && c.Expression != nil {
+				if index == len(fu.Body)-1 && c.Expression != nil {
 					sb.WriteString("return ")
 
 				}
