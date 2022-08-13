@@ -12,7 +12,8 @@ import (
 func visitCommand(sb *strings.Builder, c *Command) {
 	if c.Print != nil {
 		sb.WriteString("fmt.Println(")
-		sb.WriteString(c.Print.Expression)
+		visitExpression(sb, c.Print.Expression)
+		// sb.WriteString(c.Print.Expression)
 		sb.WriteString(")")
 		sb.WriteString("\n")
 	}
@@ -24,6 +25,17 @@ func visitCommand(sb *strings.Builder, c *Command) {
 		visitCall(sb, c.Call)
 		sb.WriteString("\n")
 	}
+	if c.Let != nil {
+		visitLet(sb, c.Let)
+		sb.WriteString("\n")
+	}
+}
+
+func visitLet(sb *strings.Builder, l *Let) {
+	sb.WriteString("var ")
+	sb.WriteString(l.Var)
+	sb.WriteString(" = ")
+	visitExpression(sb, l.Expression)
 }
 
 func visitCall(sb *strings.Builder, c *Call) {
@@ -36,7 +48,7 @@ func visitCall(sb *strings.Builder, c *Call) {
 			sb.WriteString(",")
 		}
 	}
-	sb.WriteString(")\n")
+	sb.WriteString(")")
 }
 
 func visitPrimary(sb *strings.Builder, p *Primary) {
@@ -48,6 +60,9 @@ func visitPrimary(sb *strings.Builder, p *Primary) {
 	}
 	if p.Int != nil {
 		sb.WriteString(strconv.Itoa(*p.Int))
+	}
+	if p.Variable != nil {
+		sb.WriteString(*p.Variable)
 	}
 	if p.SubExpression != nil {
 		sb.WriteString("(")

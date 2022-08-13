@@ -15,15 +15,25 @@ type Function struct {
 	Name   string     `"fn" @Ident`
 	Args   []*Arg     `"(" ( @@ ( "," @@ )* )? ")"`
 	Return string     `("-" ">" @Ident)? ":"`
-	Body   []*Command `@@* "end"`
+	Body   []*Command `((?! 'end') @@)*`
+	End    bool       `@"end"`
 }
 
 type Command struct {
 	Pos lexer.Position
 
-	Print      *Print      `( @@`
+	Let        *Let        `( @@`
+	Print      *Print      `| @@`
 	Call       *Call       `| @@`
 	Expression *Expression `| @@ )`
+}
+
+type Let struct {
+	Pos lexer.Position
+
+	Var string `"let" @Ident "="`
+	//Args []string `"(" ( @String ( "," @String )* )? ")"`
+	Expression *Expression `@@`
 }
 
 type Call struct {
@@ -36,7 +46,7 @@ type Call struct {
 
 type Print struct {
 	Pos        lexer.Position
-	Expression string `"print" @String`
+	Expression *Expression `"print" @@`
 }
 
 type Arg struct {
@@ -82,11 +92,11 @@ type Unary struct {
 }
 
 type Primary struct {
-	Float  *float64 `( @Float`
-	Int    *int     `| @Int`
-	String *string  `| @String`
-	Bool   *bool    `| ( @"true" | "false" )`
-	Nil    bool     `| @"nil"`
-	// Variable      *string     `| @Ident `
+	Float         *float64    `( @Float`
+	Int           *int        `| @Int`
+	String        *string     `| @String`
+	Bool          *bool       `| ( @"true" | "false" )`
+	Nil           bool        `| @"nil"`
+	Variable      *string     `| @Ident `
 	SubExpression *Expression `| "(" @@ ")" )`
 }
