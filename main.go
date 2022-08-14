@@ -10,6 +10,8 @@ import (
 )
 
 type Visitor interface {
+	visitAst(*HiroAst)
+	visitFunction(*Function)
 	visitCommand(*Command)
 	visitExpr(*Expr)
 	visitLet(*Let)
@@ -25,6 +27,36 @@ type Visitor interface {
 
 type GoGenerator struct {
 	sb *strings.Builder
+}
+
+func (g *GoGenerator) visitAst(ast *HiroAst) {
+	g.sb.WriteString("package main\n\n")
+	g.sb.WriteString("import (\n\t\"fmt\")\n\n")
+
+	for _, fu := range ast.Functions {
+		g.visitFunction(fu)
+	}
+}
+
+func (g *GoGenerator) visitFunction(f *Function) {
+	g.sb.WriteString(fmt.Sprintf(`func %s(`, f.Name))
+	for i, arg := range f.Args {
+		g.sb.WriteString(arg.VarName)
+		g.sb.WriteString(" ")
+		g.sb.WriteString(arg.VarType)
+		if i < len(f.Args)-1 {
+			g.sb.WriteString(", ")
+		}
+	}
+	g.sb.WriteString(fmt.Sprintf(`) %s {`, f.Return))
+	g.sb.WriteString("\n")
+	for index, c := range f.Body {
+		if index == len(f.Body)-1 && c.Expression != nil {
+			g.sb.WriteString("return ")
+		}
+		g.visitCommand(c)
+	}
+	g.sb.WriteString("}\n")
 }
 
 func (g *GoGenerator) visitCommand(c *Command) {
@@ -172,42 +204,18 @@ func main() {
 	} else {
 		spew.Dump(hiro)
 
+		var sb strings.Builder
+		goGenerator := &GoGenerator{
+			sb: &sb,
+		}
+
 		f, err := os.Create("target/my.go")
 		if err != nil {
 			panic(err)
 		}
 		defer f.Close()
 
-		var sb strings.Builder
-
-		_, err = f.WriteString("package main\n\n")
-
-		sb.WriteString("import (\n\t\"fmt\")\n\n")
-		for _, fu := range hiro.Functions {
-			sb.WriteString(fmt.Sprintf(`func %s(`, fu.Name))
-			for i, arg := range fu.Args {
-				sb.WriteString(arg.VarName)
-				sb.WriteString(" ")
-				sb.WriteString(arg.VarType)
-				if i < len(fu.Args)-1 {
-					sb.WriteString(", ")
-				}
-			}
-			sb.WriteString(fmt.Sprintf(`) %s {`, fu.Return))
-			sb.WriteString("\n")
-			for index, c := range fu.Body {
-				if index == len(fu.Body)-1 && c.Expression != nil {
-					sb.WriteString("return ")
-
-				}
-				goGenerator := &GoGenerator{
-					sb: &sb,
-				}
-				goGenerator.visitCommand(c)
-			}
-			sb.WriteString("}\n")
-		}
-
+		goGenerator.visitAst(hiro)
 		_, err = f.WriteString(sb.String())
 	}
 }
