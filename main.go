@@ -220,6 +220,8 @@ func main() {
 	}
 }
 
+// Template for function to be called async
+//
 //func {:}() <- chan x {{
 //	res := make(chan x)
 //	go func() {{
