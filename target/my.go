@@ -7,6 +7,6 @@ func add(a int, b int) int {
 return a+b
 }
 func main()  {
-var a = 3
+var a = add(3,2)
 fmt.Println(a)
 }

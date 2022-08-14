@@ -33,7 +33,7 @@ type Let struct {
 
 	Var string `"let" @Ident "="`
 	//Args []string `"(" ( @String ( "," @String )* )? ")"`
-	Expression *Expression `@@`
+	Expr *Expr `@@`
 }
 
 type Call struct {
@@ -56,6 +56,11 @@ type Arg struct {
 }
 
 // Expressions
+
+type Expr struct {
+	Call       *Call       `( @@`
+	Expression *Expression `| @@ )`
+}
 
 type Expression struct {
 	Equality *Equality `@@`
