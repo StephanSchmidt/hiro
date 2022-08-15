@@ -19,6 +19,19 @@ import (
 //	return res
 //}}
 
+// Template for expression
+//
+//  a := 1 + 2
+//
+//	expr := make(chan int)
+//	go func() {
+//		defer close(expr)
+//		expr <- 1 + 2
+//	}()
+//  ...
+//  a := <- expr
+//}
+
 func main() {
 
 	//basicLexer := lexer.MustSimple([]lexer.SimpleRule{
