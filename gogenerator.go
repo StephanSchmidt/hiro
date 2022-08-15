@@ -20,6 +20,7 @@ func (g *GoGenerator) visitAst(ast *HiroAst) {
 }
 
 func (g *GoGenerator) visitFunction(f *Function) {
+
 	g.sb.WriteString(fmt.Sprintf(`func %s(`, f.Name))
 	for i, arg := range f.Args {
 		g.sb.WriteString(arg.VarName)
@@ -29,15 +30,32 @@ func (g *GoGenerator) visitFunction(f *Function) {
 			g.sb.WriteString(", ")
 		}
 	}
-	g.sb.WriteString(fmt.Sprintf(`) %s {`, f.Return))
-	g.sb.WriteString("\n")
-	for index, c := range f.Body {
-		if index == len(f.Body)-1 && c.Expression != nil {
-			g.sb.WriteString("return ")
-		}
-		g.visitCommand(c)
+	hasReturn := false
+	if len(f.Return) != 0 {
+		hasReturn = true
 	}
-	g.sb.WriteString("}\n")
+	// if f.Body[len(f.Body)-1].Expression != nil {
+	//	hasReturn = true
+	//}
+	if hasReturn {
+		g.sb.WriteString(fmt.Sprintf(`) <- chan %s {`, f.Return))
+		g.sb.WriteString(fmt.Sprintf("\nres := make(chan %s)\ngo func(){\n defer close(res)\n", f.Return))
+		for index, c := range f.Body {
+			if index == len(f.Body)-1 {
+				g.sb.WriteString("res <- ")
+			}
+			g.visitCommand(c)
+		}
+		g.sb.WriteString("}()\n")
+		g.sb.WriteString("return res\n")
+		g.sb.WriteString("}\n")
+	} else {
+		g.sb.WriteString(fmt.Sprintf(`) {`))
+		for _, c := range f.Body {
+			g.visitCommand(c)
+		}
+		g.sb.WriteString("}\n")
+	}
 }
 
 func (g *GoGenerator) visitCommand(c *Command) {
@@ -78,6 +96,7 @@ func (g *GoGenerator) visitLet(l *Let) {
 }
 
 func (g *GoGenerator) visitCall(c *Call) {
+	g.sb.WriteString("(<- ")
 	g.sb.WriteString(c.Name)
 	g.sb.WriteString("(")
 	for i, par := range c.Args {
@@ -87,7 +106,7 @@ func (g *GoGenerator) visitCall(c *Call) {
 			g.sb.WriteString(",")
 		}
 	}
-	g.sb.WriteString(")")
+	g.sb.WriteString("))")
 }
 
 func (g *GoGenerator) visitPrimary(p *Primary) {
