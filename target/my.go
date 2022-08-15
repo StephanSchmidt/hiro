@@ -11,6 +11,6 @@ res <- a+b
 }()
 return res
 }
-func main() {var a = (<- add(2,3))
+func main() {var a = (<- add(2,3))+(<- add(2,3))
 fmt.Println(a)
 }

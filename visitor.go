@@ -6,7 +6,6 @@ type Visitor interface {
 	visitAst(*HiroAst)
 	visitFunction(*Function)
 	visitCommand(*Command)
-	visitExpr(*Expr)
 	visitLet(*Let)
 	visitCall(*Call)
 	visitPrimary(*Primary)

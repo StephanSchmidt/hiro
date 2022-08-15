@@ -79,20 +79,12 @@ func (g *GoGenerator) visitCommand(c *Command) {
 		g.sb.WriteString("\n")
 	}
 }
-func (g *GoGenerator) visitExpr(e *Expr) {
-	if e.Call != nil {
-		g.visitCall(e.Call)
-	}
-	if e.Expression != nil {
-		g.visitExpression(e.Expression)
-	}
-}
 
 func (g *GoGenerator) visitLet(l *Let) {
 	g.sb.WriteString("var ")
 	g.sb.WriteString(l.Var)
 	g.sb.WriteString(" = ")
-	g.visitExpr(l.Expr)
+	g.visitExpression(l.Expr)
 }
 
 func (g *GoGenerator) visitCall(c *Call) {
@@ -126,6 +118,9 @@ func (g *GoGenerator) visitPrimary(p *Primary) {
 		g.sb.WriteString("(")
 		g.visitExpression(p.SubExpression)
 		g.sb.WriteString(")")
+	}
+	if p.Call != nil {
+		g.visitCall(p.Call)
 	}
 }
 func (g *GoGenerator) visitUnary(u *Unary) {
