@@ -51,6 +51,7 @@ func (g *GoGenerator) visitFunction(f *Function) {
 		g.sb.WriteString("}\n")
 	} else {
 		g.sb.WriteString(fmt.Sprintf(`) {`))
+		g.sb.WriteString("\n")
 		for _, c := range f.Body {
 			g.visitCommand(c)
 		}
