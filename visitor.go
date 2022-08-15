@@ -1,5 +1,7 @@
 package main
 
+// Visitor Not really a visitor currently,
+// we do not use accept as we know the subtypes
 type Visitor interface {
 	visitAst(*HiroAst)
 	visitFunction(*Function)
