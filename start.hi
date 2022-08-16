@@ -4,5 +4,6 @@ end
 
 fn main():
     let a = add(2,3) + add(2,3)
-	print a
+    print a
+	print add(2,3)
 end
