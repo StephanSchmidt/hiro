@@ -60,11 +60,13 @@ func main() {
 		spew.Dump(hiro)
 		panic(err)
 	} else {
-		spew.Dump(hiro)
+		// spew.Dump(hiro)
 
 		var sb strings.Builder
+		var symbols = make(map[string]bool)
 		goGenerator := &GoGenerator{
-			sb: &sb,
+			sb:      &sb,
+			Symbols: &symbols,
 		}
 
 		f, err := os.Create("target/my.go")

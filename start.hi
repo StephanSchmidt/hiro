@@ -3,7 +3,9 @@ fn add(a:int, b:int) -> int:
 end
 
 fn main():
-    let a = add(2,3) + add(2,3)
+    let b = 3
+    let a = add(2,3) + 2
+    print add(2,3)
     print a
-	print add(2,3)
+    print b
 end

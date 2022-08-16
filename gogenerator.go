@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"strconv"
 	"strings"
 )
 
 type GoGenerator struct {
-	sb *strings.Builder
+	sb      *strings.Builder
+	Symbols *map[string]bool
 }
 
 func (g *GoGenerator) visitAst(ast *HiroAst) {
@@ -61,6 +63,22 @@ func (g *GoGenerator) visitFunction(f *Function) {
 
 func (g *GoGenerator) visitCommand(c *Command) {
 	if c.Print != nil {
+		v := &VarsChecker{}
+		v.visitExpression(c.Print.Expression)
+		spew.Dump(v.Vars)
+		for _, variable := range v.Vars {
+			fmt.Println(variable)
+			fmt.Println((*g.Symbols)[variable])
+			if (*g.Symbols)[variable] == false {
+				(*g.Symbols)[variable] = true
+				g.sb.WriteString("var ")
+				g.sb.WriteString(variable + "_done")
+				g.sb.WriteString(" = <- ")
+				g.sb.WriteString(variable)
+				g.sb.WriteString("\n")
+			}
+		}
+
 		g.sb.WriteString("fmt.Println(")
 		g.visitExpression(c.Print.Expression)
 		// sb.WriteString(c.Print.Expression)
@@ -82,10 +100,32 @@ func (g *GoGenerator) visitCommand(c *Command) {
 }
 
 func (g *GoGenerator) visitLet(l *Let) {
-	g.sb.WriteString("var ")
-	g.sb.WriteString(l.Var)
-	g.sb.WriteString(" = ")
-	g.visitExpression(l.Expr)
+	if l.Expr.CheckedForAsync == false {
+		ac := &AsyncChecker{
+			async: false,
+		}
+		ac.visitExpression(l.Expr)
+		l.Expr.CheckedForAsync = true
+		l.Expr.IsAsync = ac.async
+	}
+
+	if l.Expr.IsAsync {
+		varName := l.Var
+		g.sb.WriteString(varName + " := make(chan any)\n")
+		g.sb.WriteString("go func() {\n")
+		g.sb.WriteString("defer close(" + varName + ")\n")
+		g.sb.WriteString(varName)
+		g.sb.WriteString(" <- ")
+		g.visitExpression(l.Expr)
+		g.sb.WriteString("}()\n")
+		(*g.Symbols)[l.Var] = false
+	} else {
+		g.sb.WriteString("var ")
+		g.sb.WriteString(l.Var + "_done")
+		g.sb.WriteString(" = ")
+		g.visitExpression(l.Expr)
+		(*g.Symbols)[l.Var] = true
+	}
 }
 
 func (g *GoGenerator) visitCall(c *Call) {
@@ -113,7 +153,12 @@ func (g *GoGenerator) visitPrimary(p *Primary) {
 		g.sb.WriteString(strconv.Itoa(*p.Int))
 	}
 	if p.Variable != nil {
-		g.sb.WriteString(*p.Variable)
+		there, _ := (*g.Symbols)[*p.Variable]
+		if there {
+			g.sb.WriteString(*p.Variable + "_done")
+		} else {
+			g.sb.WriteString(*p.Variable)
+		}
 	}
 	if p.SubExpression != nil {
 		g.sb.WriteString("(")

@@ -58,7 +58,9 @@ type Arg struct {
 // Expressions
 
 type Expression struct {
-	Equality *Equality `@@`
+	IsAsync         bool
+	CheckedForAsync bool
+	Equality        *Equality `@@`
 }
 
 type Equality struct {
