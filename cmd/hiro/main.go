@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/alecthomas/participle/v2"
 	"github.com/davecgh/go-spew/spew"
+	"hirogo/pkg"
 	"os"
 	"strings"
 )
@@ -45,7 +46,7 @@ func main() {
 	//	{"whitespace", `[ \t]+`},
 	//})
 
-	var parser, err = participle.Build[HiroAst](participle.UseLookahead(2))
+	var parser, err = participle.Build[pkg.HiroAst](participle.UseLookahead(2))
 	if err != nil {
 		fmt.Println("Can't parse grammar.")
 		panic(err)
@@ -63,10 +64,10 @@ func main() {
 		// spew.Dump(hiro)
 
 		var sb strings.Builder
-		var symbols = NewSymbols()
+		var symbols = pkg.NewSymbols()
 
-		goGenerator := &GoGenerator{
-			sb:      &sb,
+		goGenerator := &pkg.GoGenerator{
+			Sb:      &sb,
 			Symbols: symbols,
 		}
 
@@ -81,7 +82,7 @@ func main() {
 			}
 		}(f)
 
-		goGenerator.visitAst(hiro)
+		goGenerator.VisitAst(hiro)
 		_, err = f.WriteString(sb.String())
 	}
 }

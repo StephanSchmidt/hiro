@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -8,13 +8,13 @@ import (
 )
 
 type GoGenerator struct {
-	sb      *strings.Builder
+	Sb      *strings.Builder
 	Symbols *Symbols
 }
 
-func (g *GoGenerator) visitAst(ast *HiroAst) {
-	g.sb.WriteString("package main\n\n")
-	g.sb.WriteString("import (\n\t\"fmt\")\n\n")
+func (g *GoGenerator) VisitAst(ast *HiroAst) {
+	g.Sb.WriteString("package main\n\n")
+	g.Sb.WriteString("import (\n\t\"fmt\")\n\n")
 
 	for _, fu := range ast.Functions {
 		g.visitFunction(fu)
@@ -23,13 +23,13 @@ func (g *GoGenerator) visitAst(ast *HiroAst) {
 
 func (g *GoGenerator) visitFunction(f *Function) {
 
-	g.sb.WriteString(fmt.Sprintf(`func %s(`, f.Name))
+	g.Sb.WriteString(fmt.Sprintf(`func %s(`, f.Name))
 	for i, arg := range f.Args {
-		g.sb.WriteString(arg.VarName)
-		g.sb.WriteString(" ")
-		g.sb.WriteString(arg.VarType)
+		g.Sb.WriteString(arg.VarName)
+		g.Sb.WriteString(" ")
+		g.Sb.WriteString(arg.VarType)
 		if i < len(f.Args)-1 {
-			g.sb.WriteString(", ")
+			g.Sb.WriteString(", ")
 		}
 	}
 	hasReturn := false
@@ -40,24 +40,24 @@ func (g *GoGenerator) visitFunction(f *Function) {
 	//	hasReturn = true
 	//}
 	if hasReturn {
-		g.sb.WriteString(fmt.Sprintf(`) <- chan %s {`, f.Return))
-		g.sb.WriteString(fmt.Sprintf("\nres := make(chan %s)\ngo func(){\n defer close(res)\n", f.Return))
+		g.Sb.WriteString(fmt.Sprintf(`) <- chan %s {`, f.Return))
+		g.Sb.WriteString(fmt.Sprintf("\nres := make(chan %s)\ngo func(){\n defer close(res)\n", f.Return))
 		for index, c := range f.Body {
 			if index == len(f.Body)-1 {
-				g.sb.WriteString("res <- ")
+				g.Sb.WriteString("res <- ")
 			}
 			g.visitCommand(c)
 		}
-		g.sb.WriteString("}()\n")
-		g.sb.WriteString("return res\n")
-		g.sb.WriteString("}\n")
+		g.Sb.WriteString("}()\n")
+		g.Sb.WriteString("return res\n")
+		g.Sb.WriteString("}\n")
 	} else {
-		g.sb.WriteString(fmt.Sprintf(`) {`))
-		g.sb.WriteString("\n")
+		g.Sb.WriteString(fmt.Sprintf(`) {`))
+		g.Sb.WriteString("\n")
 		for _, c := range f.Body {
 			g.visitCommand(c)
 		}
-		g.sb.WriteString("}\n")
+		g.Sb.WriteString("}\n")
 	}
 }
 
@@ -68,32 +68,32 @@ func (g *GoGenerator) visitCommand(c *Command) {
 		spew.Dump(v.Vars)
 		for _, variable := range v.Vars {
 			if !g.Symbols.isResolved(&variable) {
-				g.sb.WriteString("var ")
-				g.sb.WriteString("_" + variable)
-				g.sb.WriteString(" = <- ")
-				g.sb.WriteString(variable)
-				g.sb.WriteString("\n")
+				g.Sb.WriteString("var ")
+				g.Sb.WriteString("_" + variable)
+				g.Sb.WriteString(" = <- ")
+				g.Sb.WriteString(variable)
+				g.Sb.WriteString("\n")
 				g.Symbols.resolve(&variable)
 			}
 		}
 
-		g.sb.WriteString("fmt.Println(")
+		g.Sb.WriteString("fmt.Println(")
 		g.visitExpression(c.Print.Expression)
-		// sb.WriteString(c.Print.Expression)
-		g.sb.WriteString(")")
-		g.sb.WriteString("\n")
+		// Sb.WriteString(c.Print.Expression)
+		g.Sb.WriteString(")")
+		g.Sb.WriteString("\n")
 	}
 	if c.Expression != nil {
 		g.visitExpression(c.Expression)
-		g.sb.WriteString("\n")
+		g.Sb.WriteString("\n")
 	}
 	if c.Call != nil {
 		g.visitCall(c.Call)
-		g.sb.WriteString("\n")
+		g.Sb.WriteString("\n")
 	}
 	if c.Let != nil {
 		g.visitLet(c.Let)
-		g.sb.WriteString("\n")
+		g.Sb.WriteString("\n")
 	}
 }
 
@@ -109,18 +109,18 @@ func (g *GoGenerator) visitLet(l *Let) {
 
 	if l.Expr.IsAsync {
 		varName := l.Var
-		g.sb.WriteString(varName + " := make(chan any)\n")
-		g.sb.WriteString("go func() {\n")
-		g.sb.WriteString("defer close(" + varName + ")\n")
-		g.sb.WriteString(varName)
-		g.sb.WriteString(" <- ")
+		g.Sb.WriteString(varName + " := make(chan any)\n")
+		g.Sb.WriteString("go func() {\n")
+		g.Sb.WriteString("defer close(" + varName + ")\n")
+		g.Sb.WriteString(varName)
+		g.Sb.WriteString(" <- ")
 		g.visitExpression(l.Expr)
-		g.sb.WriteString("}()\n")
+		g.Sb.WriteString("}()\n")
 		g.Symbols.add(&l.Var)
 	} else {
-		g.sb.WriteString("var ")
-		g.sb.WriteString("_" + l.Var)
-		g.sb.WriteString(" = ")
+		g.Sb.WriteString("var ")
+		g.Sb.WriteString("_" + l.Var)
+		g.Sb.WriteString(" = ")
 		g.visitExpression(l.Expr)
 		g.Symbols.add(&l.Var)
 		g.Symbols.resolve(&l.Var)
@@ -128,47 +128,47 @@ func (g *GoGenerator) visitLet(l *Let) {
 }
 
 func (g *GoGenerator) visitCall(c *Call) {
-	g.sb.WriteString("(<- ")
-	g.sb.WriteString(c.Name)
-	g.sb.WriteString("(")
+	g.Sb.WriteString("(<- ")
+	g.Sb.WriteString(c.Name)
+	g.Sb.WriteString("(")
 	for i, par := range c.Args {
-		//sb.WriteString(par)
+		//Sb.WriteString(par)
 		g.visitExpression(par)
 		if i < len(c.Args)-1 {
-			g.sb.WriteString(",")
+			g.Sb.WriteString(",")
 		}
 	}
-	g.sb.WriteString("))")
+	g.Sb.WriteString("))")
 }
 
 func (g *GoGenerator) visitPrimary(p *Primary) {
 	if p.String != nil {
-		g.sb.WriteString(*p.String)
+		g.Sb.WriteString(*p.String)
 	}
 	if p.Float != nil {
-		g.sb.WriteString(strconv.FormatFloat(3.1415, 'E', -1, 64))
+		g.Sb.WriteString(strconv.FormatFloat(3.1415, 'E', -1, 64))
 	}
 	if p.Int != nil {
-		g.sb.WriteString(strconv.Itoa(*p.Int))
+		g.Sb.WriteString(strconv.Itoa(*p.Int))
 	}
 	if p.Variable != nil {
 		if g.Symbols.contains(p.Variable) {
-			g.sb.WriteString("_" + *p.Variable)
+			g.Sb.WriteString("_" + *p.Variable)
 		} else {
-			g.sb.WriteString(*p.Variable)
+			g.Sb.WriteString(*p.Variable)
 		}
 	}
 	if p.SubExpression != nil {
-		g.sb.WriteString("(")
+		g.Sb.WriteString("(")
 		g.visitExpression(p.SubExpression)
-		g.sb.WriteString(")")
+		g.Sb.WriteString(")")
 	}
 	if p.Call != nil {
 		g.visitCall(p.Call)
 	}
 }
 func (g *GoGenerator) visitUnary(u *Unary) {
-	g.sb.WriteString(u.Op)
+	g.Sb.WriteString(u.Op)
 	if u.Unary != nil {
 		g.visitUnary(u.Unary)
 	}
@@ -179,7 +179,7 @@ func (g *GoGenerator) visitMultiplication(m *Multiplication) {
 	if m.Unary != nil {
 		g.visitUnary(m.Unary)
 	}
-	g.sb.WriteString(m.Op)
+	g.Sb.WriteString(m.Op)
 	if m.Next != nil {
 		g.visitMultiplication(m.Next)
 	}
@@ -187,7 +187,7 @@ func (g *GoGenerator) visitMultiplication(m *Multiplication) {
 
 func (g *GoGenerator) visitAddition(a *Addition) {
 	g.visitMultiplication(a.Multiplication)
-	g.sb.WriteString(a.Op)
+	g.Sb.WriteString(a.Op)
 	if a.Next != nil {
 		g.visitAddition(a.Next)
 	}
@@ -195,7 +195,7 @@ func (g *GoGenerator) visitAddition(a *Addition) {
 
 func (g *GoGenerator) visitComparison(c *Comparison) {
 	g.visitAddition(c.Addition)
-	g.sb.WriteString(c.Op)
+	g.Sb.WriteString(c.Op)
 	if c.Next != nil {
 		g.visitComparison(c.Next)
 	}
@@ -203,7 +203,7 @@ func (g *GoGenerator) visitComparison(c *Comparison) {
 }
 func (g *GoGenerator) visitEquality(e *Equality) {
 	g.visitComparison(e.Comparison)
-	g.sb.WriteString(e.Op)
+	g.Sb.WriteString(e.Op)
 	if e.Next != nil {
 		g.visitEquality(e.Next)
 	}

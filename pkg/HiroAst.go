@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"github.com/alecthomas/participle/v2/lexer"

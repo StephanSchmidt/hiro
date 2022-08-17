@@ -1,4 +1,4 @@
-package main
+package pkg
 
 type VarsChecker struct {
 	Vars []string

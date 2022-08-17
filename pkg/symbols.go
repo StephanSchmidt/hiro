@@ -1,4 +1,4 @@
-package main
+package pkg
 
 type Symbols struct {
 	Symbols map[string]bool
