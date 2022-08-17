@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/StephanSchmidt/hiro/cmd/hiro/compiler"
 	"github.com/alecthomas/participle/v2"
 	"github.com/davecgh/go-spew/spew"
+	"hiro/compiler"
 	"os"
 	"strings"
 )
