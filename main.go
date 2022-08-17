@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/StephanSchmidt/hiro/cmd/hiro/compiler"
 	"github.com/alecthomas/participle/v2"
 	"github.com/davecgh/go-spew/spew"
-	"hirogo/pkg"
 	"os"
 	"strings"
 )
@@ -46,7 +46,7 @@ func main() {
 	//	{"whitespace", `[ \t]+`},
 	//})
 
-	var parser, err = participle.Build[pkg.HiroAst](participle.UseLookahead(2))
+	var parser, err = participle.Build[compiler.HiroAst](participle.UseLookahead(2))
 	if err != nil {
 		fmt.Println("Can't parse grammar.")
 		panic(err)
@@ -64,9 +64,9 @@ func main() {
 		// spew.Dump(hiro)
 
 		var sb strings.Builder
-		var symbols = pkg.NewSymbols()
+		var symbols = compiler.NewSymbols()
 
-		goGenerator := &pkg.GoGenerator{
+		goGenerator := &compiler.GoGenerator{
 			Sb:      &sb,
 			Symbols: symbols,
 		}
