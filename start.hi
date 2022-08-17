@@ -1,10 +1,12 @@
-fn add(a:int, b:int) -> int:
-	a+b
+fn add(x:int, y:int) -> int:
+    let b = add(3,2)
+    print b
+	x+y
 end
 
 fn main():
     let a = add(2,3) + 2
-    let b = 3
+    let b = add(2,3)
     print add(2,3)
     print b
     print a

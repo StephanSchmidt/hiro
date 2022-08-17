@@ -4,24 +4,38 @@ import (
 	"fmt"
 )
 
-func add(a int, b int) <-chan int {
+func add(x int, y int) <-chan int {
 	res := make(chan int)
 	go func() {
 		defer close(res)
-		res <- a + b
+		b := make(chan any)
+		go func() {
+			defer close(b)
+			b <- (<-add(3, 2))
+		}()
+
+		var _b = <-b
+		fmt.Println(_b)
+		res <- x + y
 	}()
 	return res
 }
 func main() {
-	var b_done = 3
 	a := make(chan any)
 	go func() {
 		defer close(a)
 		a <- (<-add(2, 3)) + 2
 	}()
 
+	b := make(chan any)
+	go func() {
+		defer close(b)
+		b <- (<-add(2, 3))
+	}()
+
 	fmt.Println((<-add(2, 3)))
-	var a_done = <-a
-	fmt.Println(a_done)
-	fmt.Println(b_done)
+	var _b = <-b
+	fmt.Println(_b)
+	var _a = <-a
+	fmt.Println(_a)
 }

@@ -9,7 +9,7 @@ import (
 
 type GoGenerator struct {
 	sb      *strings.Builder
-	Symbols *map[string]bool
+	Symbols *Symbols
 }
 
 func (g *GoGenerator) visitAst(ast *HiroAst) {
@@ -67,15 +67,13 @@ func (g *GoGenerator) visitCommand(c *Command) {
 		v.visitExpression(c.Print.Expression)
 		spew.Dump(v.Vars)
 		for _, variable := range v.Vars {
-			fmt.Println(variable)
-			fmt.Println((*g.Symbols)[variable])
-			if (*g.Symbols)[variable] == false {
-				(*g.Symbols)[variable] = true
+			if !g.Symbols.isResolved(&variable) {
 				g.sb.WriteString("var ")
-				g.sb.WriteString(variable + "_done")
+				g.sb.WriteString("_" + variable)
 				g.sb.WriteString(" = <- ")
 				g.sb.WriteString(variable)
 				g.sb.WriteString("\n")
+				g.Symbols.resolve(&variable)
 			}
 		}
 
@@ -118,13 +116,14 @@ func (g *GoGenerator) visitLet(l *Let) {
 		g.sb.WriteString(" <- ")
 		g.visitExpression(l.Expr)
 		g.sb.WriteString("}()\n")
-		(*g.Symbols)[l.Var] = false
+		g.Symbols.add(&l.Var)
 	} else {
 		g.sb.WriteString("var ")
-		g.sb.WriteString(l.Var + "_done")
+		g.sb.WriteString("_" + l.Var)
 		g.sb.WriteString(" = ")
 		g.visitExpression(l.Expr)
-		(*g.Symbols)[l.Var] = true
+		g.Symbols.add(&l.Var)
+		g.Symbols.resolve(&l.Var)
 	}
 }
 
@@ -153,9 +152,8 @@ func (g *GoGenerator) visitPrimary(p *Primary) {
 		g.sb.WriteString(strconv.Itoa(*p.Int))
 	}
 	if p.Variable != nil {
-		there, _ := (*g.Symbols)[*p.Variable]
-		if there {
-			g.sb.WriteString(*p.Variable + "_done")
+		if g.Symbols.contains(p.Variable) {
+			g.sb.WriteString("_" + *p.Variable)
 		} else {
 			g.sb.WriteString(*p.Variable)
 		}
