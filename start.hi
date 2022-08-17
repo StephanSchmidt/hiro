@@ -1,6 +1,4 @@
 fn add(x:int, y:int) -> int:
-    let b = add(3,2)
-    print b
 	x+y
 end
 

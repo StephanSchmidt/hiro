@@ -8,14 +8,6 @@ func add(x int, y int) <-chan int {
 	res := make(chan int)
 	go func() {
 		defer close(res)
-		b := make(chan any)
-		go func() {
-			defer close(b)
-			b <- (<-add(3, 2))
-		}()
-
-		var _b = <-b
-		fmt.Println(_b)
 		res <- x + y
 	}()
 	return res
