@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/akamensky/argparse"
 	"github.com/alecthomas/participle/v2"
 	"github.com/davecgh/go-spew/spew"
 	"hiro/compiler"
@@ -46,13 +47,21 @@ func main() {
 	//	{"whitespace", `[ \t]+`},
 	//})
 
-	var parser, err = participle.Build[compiler.HiroAst](participle.UseLookahead(2))
+	argsParser := argparse.NewParser("hiro", "Hiro compiler")
+	h := argsParser.String("s", "hiro", &argparse.Options{Required: true, Help: "Hiro source file"})
+	t := argsParser.String("t", "target", &argparse.Options{Required: true, Help: "Target directory for go"})
+	err := argsParser.Parse(os.Args)
+	if err != nil {
+		fmt.Print(argsParser.Usage(err))
+	}
+
+	parser, err := participle.Build[compiler.HiroAst](participle.UseLookahead(2))
 	if err != nil {
 		fmt.Println("Can't parse grammar.")
 		panic(err)
 	}
 
-	dat, err := os.ReadFile("start.hi")
+	dat, err := os.ReadFile(*h)
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +80,7 @@ func main() {
 			Symbols: symbols,
 		}
 
-		f, err := os.Create("target/my.go")
+		f, err := os.Create(*t + "/my.go")
 		if err != nil {
 			panic(err)
 		}
