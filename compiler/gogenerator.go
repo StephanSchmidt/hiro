@@ -22,7 +22,7 @@ func (g *GoGenerator) VisitAst(ast *HiroAst) {
 }
 
 func (g *GoGenerator) visitFunction(f *Function) {
-
+	g.Symbols.newScope()
 	g.Sb.WriteString(fmt.Sprintf(`func %s(`, f.Name))
 	for i, arg := range f.Args {
 		g.Sb.WriteString(arg.VarName)
@@ -59,6 +59,7 @@ func (g *GoGenerator) visitFunction(f *Function) {
 		}
 		g.Sb.WriteString("}\n")
 	}
+	g.Symbols.backScope()
 }
 
 func (g *GoGenerator) visitCommand(c *Command) {

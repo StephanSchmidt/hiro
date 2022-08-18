@@ -22,3 +22,20 @@ func TestAsyncSymbols(t *testing.T) {
 	s.resolve(&sym)
 	assert.True(t, s.isResolved(&sym), "Symbols should contain resolved symbol after being resolved")
 }
+
+func TestScope(t *testing.T) {
+	s := NewSymbols()
+	sym := "a"
+	s.add(&sym)
+	s.newScope()
+	assert.True(t, s.contains(&sym), "Symbols should contain symbol after added symbol")
+}
+
+func TestBackScope(t *testing.T) {
+	s := NewSymbols()
+	sym := "a"
+	s.newScope()
+	s.add(&sym)
+	s.backScope()
+	assert.False(t, s.contains(&sym), "Symbols should contain symbol after added symbol")
+}
