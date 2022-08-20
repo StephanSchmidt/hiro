@@ -63,6 +63,15 @@ func (g *GoGenerator) visitFunction(f *Function) {
 }
 
 func (g *GoGenerator) visitCommand(c *Command) {
+	if c.If != nil {
+		g.Sb.WriteString("if ")
+		if c.Expression != nil {
+			g.visitExpression(c.Expression)
+		}
+		g.Sb.WriteString("{\n")
+		g.Sb.WriteString("}\n")
+
+	}
 	if c.Print != nil {
 		v := &VarsChecker{}
 		v.visitExpression(c.Print.Expression)

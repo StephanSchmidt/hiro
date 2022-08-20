@@ -70,7 +70,7 @@ func main() {
 		spew.Dump(hiro)
 		panic(err)
 	} else {
-		// spew.Dump(hiro)
+		spew.Dump(hiro)
 
 		var sb strings.Builder
 		var symbols = compiler.NewSymbols()

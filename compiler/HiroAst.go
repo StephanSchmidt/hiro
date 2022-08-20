@@ -24,8 +24,17 @@ type Command struct {
 
 	Let        *Let        `( @@`
 	Print      *Print      `| @@`
+	If         *If         `| @@`
 	Call       *Call       `| @@`
 	Expression *Expression `| @@ )`
+}
+
+type If struct {
+	Pos lexer.Position
+
+	Expr    *Expression `"if" @@ ":"`
+	IfBlock []*Command  `((?! 'end') @@)*`
+	End     bool        `@"end"`
 }
 
 type Let struct {
