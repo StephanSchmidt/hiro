@@ -1,0 +1,5 @@
+fn max(x:int, y:int) -> int:
+    if x>y:
+        x
+    end
+end
