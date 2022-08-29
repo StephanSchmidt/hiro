@@ -31,6 +31,7 @@ func TestTwoWithIsEqualityOrComparisonWithAddition(t *testing.T) {
 func TestRightLeftComparison(t *testing.T) {
 	e := expr(`a > b`)
 	rl := RightLeftVars(e)
+	assert.Equal(t, ">", rl.Op)
 	assert.Equal(t, "a", rl.LeftVars[0])
 	assert.Equal(t, "b", rl.RightVars[0])
 }
@@ -38,6 +39,7 @@ func TestRightLeftComparison(t *testing.T) {
 func TestRightLeftEquality(t *testing.T) {
 	e := expr(`a == b`)
 	rl := RightLeftVars(e)
+	assert.Equal(t, "==", rl.Op)
 	assert.Equal(t, "a", rl.LeftVars[0])
 	assert.Equal(t, "b", rl.RightVars[0])
 }

@@ -8,6 +8,7 @@ func IsEqualityOrComparison(e *Expression) bool {
 }
 
 type WithExpression struct {
+	Op                string
 	LeftVars          []string
 	RightVars         []string
 	LeftContainsCall  bool
@@ -20,11 +21,13 @@ func ToWithExpression(rl *RightLeft, funcName string) *WithExpression {
 		RightVars:         funk.Uniq(rl.RightVars).([]string),
 		LeftContainsCall:  rl.LeftCalls != nil && funk.Contains(rl.LeftCalls, funcName),
 		RightContainsCall: rl.RightCalls != nil && funk.Contains(rl.RightCalls, funcName),
+		Op:                rl.Op,
 	}
 	return we
 }
 
 type RightLeft struct {
+	Op         string
 	LeftVars   []string
 	LeftCalls  []string
 	RightVars  []string
@@ -36,9 +39,11 @@ func RightLeftVars(e *Expression) *RightLeft {
 	left := &ExpressionAnalyzer{}
 	right := &ExpressionAnalyzer{}
 	if len(e.Equality.Op) > 0 {
+		rightLeft.Op = e.Equality.Op
 		left.visitComparison(e.Equality.Comparison)
 		right.visitEquality(e.Equality.Next)
 	} else {
+		rightLeft.Op = e.Equality.Comparison.Op
 		left.visitAddition(e.Equality.Comparison.Addition)
 		right.visitComparison(e.Equality.Comparison.Next)
 	}
