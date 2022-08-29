@@ -8,6 +8,7 @@ https://tonsky.me/blog/datascript-2/
 http://finch.stuffwithstuff.com/
 https://www.infoq.com/articles/ballerina-data-oriented-language/
 https://ballerina.io/
+https://wren.io/
 
 ## Considerations
 

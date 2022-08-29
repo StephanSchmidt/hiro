@@ -12,12 +12,18 @@ type HiroAst struct {
 }
 
 type Function struct {
-	Name   string        `"fn" @Ident`
-	Args   []*Arg        `"(" ( @@ ( "," @@ )* )? ")"`
-	With   []*Expression `("with" @@ ( "," @@ )* )?`
-	Return string        `("-" ">" @Ident)? ":"`
-	Body   []*Command    `((?! 'end') @@)*`
-	End    bool          `@"end"`
+	Name   string     `"fn" @Ident`
+	Args   []*Arg     `"(" ( @@ ( "," @@ )* )? ")"`
+	With   []*With    `("with" @@ ( "," @@ )* )?`
+	Return string     `("-" ">" @Ident)? ":"`
+	Body   []*Command `((?! 'end') @@)*`
+	End    bool       `@"end"`
+}
+
+type With struct {
+	Pos lexer.Position
+
+	Expression *Expression `@@`
 }
 
 type Command struct {

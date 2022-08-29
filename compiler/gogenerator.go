@@ -73,7 +73,7 @@ func (g *GoGenerator) visitCommand(c *Command) {
 
 	}
 	if c.Print != nil {
-		v := &VarsChecker{}
+		v := &ExpressionAnalyzer{}
 		v.visitExpression(c.Print.Expression)
 		spew.Dump(v.Vars)
 		for _, variable := range v.Vars {
