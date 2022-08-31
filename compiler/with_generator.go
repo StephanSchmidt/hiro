@@ -29,6 +29,8 @@ type WithExpression struct {
 	RightContainsVar  bool
 	LeftContainsCall  bool
 	RightContainsCall bool
+	LeftHasFreeVar    bool
+	RightHasFreeVar   bool
 }
 
 func WithExpressionTypeFor(f *Function, we *WithExpression) WithType {
@@ -36,6 +38,12 @@ func WithExpressionTypeFor(f *Function, we *WithExpression) WithType {
 	noVars := !(we.LeftHasVars || we.RightHasVars)
 	onlyRightCall := we.RightContainsCall && !we.LeftContainsCall
 	onlyLeftCall := !we.RightContainsCall && we.LeftContainsCall
+
+	// x > a // Illegal
+	// a > x // Illegal
+	if noCalls && (we.RightHasFreeVar || we.LeftHasFreeVar) {
+		return Illegal
+	}
 	// 1>2 // Illegal
 	if noVars && noCalls {
 		return Illegal
@@ -71,6 +79,8 @@ func ToWithExpression(rl *RightLeft, funcName string, vars []string) *WithExpres
 		RightContainsCall: rl.RightCalls != nil && funk.Contains(rl.RightCalls, funcName),
 		LeftContainsVar:   len(funk.Intersect(leftVars, vars).([]string)) > 0,
 		RightContainsVar:  len(funk.Intersect(rightVars, vars).([]string)) > 0,
+		LeftHasFreeVar:    len(funk.Subtract(leftVars, vars).([]string)) > 0,
+		RightHasFreeVar:   len(funk.Subtract(rightVars, vars).([]string)) > 0,
 		Op:                rl.Op,
 	}
 

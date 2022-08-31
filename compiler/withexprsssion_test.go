@@ -6,6 +6,26 @@ import (
 	"testing"
 )
 
+func TestWithFreeVarsRight(t *testing.T) {
+	e := expr(`a > x`)
+	we := ToWithExpression(RightLeftVars(e),
+		"call",
+		[]string{"a"})
+
+	assert.True(t, we.RightHasFreeVar)
+	assert.False(t, we.LeftHasFreeVar)
+}
+
+func TestWithFreeVarsLeft(t *testing.T) {
+	e := expr(`x > a`)
+	we := ToWithExpression(RightLeftVars(e),
+		"call",
+		[]string{"a"})
+
+	assert.False(t, we.RightHasFreeVar)
+	assert.True(t, we.LeftHasFreeVar)
+}
+
 func TestWithExpression(t *testing.T) {
 	e := expr(`call(a) == b`)
 	we := ToWithExpression(RightLeftVars(e),
@@ -89,6 +109,19 @@ func TestIllegal(t *testing.T) {
  		end`)
 
 	e := expr(`1>2`)
+	we := ToWithExpression(RightLeftVars(e),
+		"add",
+		[]string{"a", "b"})
+	state := WithExpressionTypeFor(f, we)
+	assert.Equal(t, Illegal, state)
+}
+
+func TestIllegalFreeVars(t *testing.T) {
+	f := Func(
+		`fn add(a:int, b:int) -> int:
+ 		end`)
+
+	e := expr(`a>x`)
 	we := ToWithExpression(RightLeftVars(e),
 		"add",
 		[]string{"a", "b"})
