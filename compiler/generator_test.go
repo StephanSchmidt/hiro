@@ -67,7 +67,7 @@ func formatSource(source string) string {
 func TestGenerateAssertion(t *testing.T) {
 	source := `
 	fn add(a:int, b:int) with
-		a > 0
+		b > 0
 		-> int:
 		a + b
 	end
@@ -75,8 +75,8 @@ func TestGenerateAssertion(t *testing.T) {
 	expected := `package main
 import ( "fmt" )
 func add(a int, b int) <-chan int {
-	if !(a > 0) {	
-		panic("Assertion failed: a > 0")	
+	if !(b > 0) {	
+		panic("Assertion failed: b>0")	
 	}
     res := make(chan int)
     go func() {

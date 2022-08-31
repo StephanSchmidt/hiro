@@ -49,8 +49,18 @@ func (g *GoGenerator) visitFunction(f *Function) {
 
 			}
 			if we.Parsed != nil && we.Parsed.WithType == Assertion {
-				g.Sb.WriteString(` if !(a > 0) {
-  panic("Assertion failed: a > 0")
+				g.Sb.WriteString(` if !(`)
+				var sb strings.Builder
+				var symbols = NewSymbols()
+				goGenerator := &GoGenerator{
+					Sb:      &sb,
+					Symbols: symbols,
+				}
+				goGenerator.visitExpression(we.Expression)
+				g.Sb.WriteString(sb.String())
+				//g.Sb.WriteString(`a > 0`)
+				g.Sb.WriteString(`) {
+  panic("Assertion failed: ` + sb.String() + `")
  }`)
 			}
 		}
