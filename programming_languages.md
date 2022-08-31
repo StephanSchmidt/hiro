@@ -9,9 +9,11 @@ http://finch.stuffwithstuff.com/
 https://www.infoq.com/articles/ballerina-data-oriented-language/
 https://ballerina.io/
 https://wren.io/
+https://github.com/jesseduffield/OK
 
 ## Considerations
 
+https://blog.kodigy.com/post/state-of-flow-based-programming/
 https://izzys.casa/2022/01/outcomes-mistakes-and-nuance/
 https://blog.ploeh.dk/2022/08/22/can-types-replace-validation/
 https://forums.swift.org/t/template-for-a-possible-future-object-model/59823
