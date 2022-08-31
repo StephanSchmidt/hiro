@@ -14,7 +14,7 @@ type GoGenerator struct {
 
 func (g *GoGenerator) VisitAst(ast *HiroAst) {
 	g.Sb.WriteString("package main\n\n")
-	g.Sb.WriteString("import (\n\t\"fmt\")\n\n")
+	g.Sb.WriteString("import (\n\t\"fmt\"\n)\n\n")
 
 	for _, fu := range ast.Functions {
 		g.visitFunction(fu)
@@ -22,6 +22,8 @@ func (g *GoGenerator) VisitAst(ast *HiroAst) {
 }
 
 func (g *GoGenerator) visitFunction(f *Function) {
+	AnnotateFunctionWith(f)
+
 	g.Symbols.newScope()
 	g.Sb.WriteString(fmt.Sprintf(`func %s(`, f.Name))
 	for i, arg := range f.Args {
@@ -33,23 +35,34 @@ func (g *GoGenerator) visitFunction(f *Function) {
 		}
 	}
 	hasReturn := false
-	if len(f.Return) != 0 {
+	if len(f.Return) > 0 {
 		hasReturn = true
 	}
 	// if f.Body[len(f.Body)-1].Expression != nil {
 	//	hasReturn = true
 	//}
 	if hasReturn {
-		g.Sb.WriteString(fmt.Sprintf(`) <- chan %s {`, f.Return))
-		g.Sb.WriteString(fmt.Sprintf("\nres := make(chan %s)\ngo func(){\n defer close(res)\n", f.Return))
+		g.Sb.WriteString(fmt.Sprintf(`) <-chan %s {`, f.Return))
+		g.Sb.WriteString("\n")
+		for _, we := range f.With {
+			if we.Parsed == nil {
+
+			}
+			if we.Parsed != nil && we.Parsed.WithType == Assertion {
+				g.Sb.WriteString(` if !(a > 0) {
+  panic("Assertion failed: a > 0")
+ }`)
+			}
+		}
+		g.Sb.WriteString(fmt.Sprintf("\n res := make(chan %s)\n go func() {\n defer close(res)\n", f.Return))
 		for index, c := range f.Body {
 			if index == len(f.Body)-1 {
-				g.Sb.WriteString("res <- ")
+				g.Sb.WriteString(" res <- ")
 			}
 			g.visitCommand(c)
 		}
-		g.Sb.WriteString("}()\n")
-		g.Sb.WriteString("return res\n")
+		g.Sb.WriteString(" }()\n")
+		g.Sb.WriteString(" return res\n")
 		g.Sb.WriteString("}\n")
 	} else {
 		g.Sb.WriteString(fmt.Sprintf(`) {`))

@@ -43,3 +43,20 @@ func TestRightLeftEquality(t *testing.T) {
 	assert.Equal(t, "a", rl.LeftVars[0])
 	assert.Equal(t, "b", rl.RightVars[0])
 }
+
+func TestAnnotateWith(t *testing.T) {
+	f := Func(`
+	fn add(a:int, b:int) with
+		a > 0,
+        add(a,b) == a + b,
+        add(2,3) == 5
+		-> int:
+		a + b
+	end
+	`)
+	AnnotateFunctionWith(f)
+	assert.NotNil(t, f.With[0].Parsed)
+	assert.Equal(t, Assertion, f.With[0].Parsed.WithType)
+	assert.Equal(t, PropTest, f.With[1].Parsed.WithType)
+	assert.Equal(t, UnitTest, f.With[2].Parsed.WithType)
+}

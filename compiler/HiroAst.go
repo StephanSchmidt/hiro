@@ -24,6 +24,8 @@ type With struct {
 	Pos lexer.Position
 
 	Expression *Expression `@@`
+	// Parsed
+	Parsed *WithExpression
 }
 
 type Command struct {

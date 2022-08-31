@@ -68,6 +68,18 @@ func WithExpressionTypeFor(we *WithExpression) WithType {
 	return Illegal
 }
 
+func AnnotateFunctionWith(f *Function) {
+	vars := funk.Map(f.Args, func(a *Arg) string {
+		return a.VarName
+	}).([]string)
+	for _, we := range f.With {
+		if we.Parsed == nil {
+			rl := RightLeftVars(we.Expression)
+			we.Parsed = ToWithExpression(rl, f.Name, vars)
+		}
+	}
+}
+
 func ToWithExpression(rl *RightLeft, funcName string, vars []string) *WithExpression {
 	leftVars := funk.UniqString(rl.LeftVars)
 	rightVars := funk.UniqString(rl.RightVars)
