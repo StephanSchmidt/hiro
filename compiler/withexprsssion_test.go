@@ -50,10 +50,6 @@ func Func(f string) *Function {
 }
 
 func TestUnitTest(t *testing.T) {
-	f := Func(
-		`fn add(a:int, b:int) -> int:
- 		end`)
-
 	e := expr(`add(2,3) > 2`)
 	we := ToWithExpression(RightLeftVars(e),
 		"add",
@@ -64,15 +60,11 @@ func TestUnitTest(t *testing.T) {
 	assert.False(t, we.RightHasVars)
 	assert.True(t, we.LeftContainsCall)
 	assert.False(t, we.RightContainsCall)
-	state := WithExpressionTypeFor(f, we)
+	state := WithExpressionTypeFor(we)
 	assert.Equal(t, UnitTest, state)
 }
 
 func TestPropTest(t *testing.T) {
-	f := Func(
-		`fn add(a:int, b:int) -> int:
- 		end`)
-
 	e := expr(`add(a,b) > a + b`)
 	we := ToWithExpression(RightLeftVars(e),
 		"add",
@@ -80,15 +72,11 @@ func TestPropTest(t *testing.T) {
 	assert.True(t, we.LeftContainsVar)
 	assert.True(t, we.LeftHasVars)
 	assert.True(t, we.LeftContainsCall)
-	state := WithExpressionTypeFor(f, we)
+	state := WithExpressionTypeFor(we)
 	assert.Equal(t, PropTest, state)
 }
 
 func TestAssertion(t *testing.T) {
-	f := Func(
-		`fn add(a:int, b:int) -> int:
- 		end`)
-
 	e := expr(`a > 2`)
 	we := ToWithExpression(RightLeftVars(e),
 		"add",
@@ -99,32 +87,24 @@ func TestAssertion(t *testing.T) {
 	assert.False(t, we.RightHasVars)
 	assert.False(t, we.LeftContainsCall)
 	assert.False(t, we.RightContainsCall)
-	state := WithExpressionTypeFor(f, we)
+	state := WithExpressionTypeFor(we)
 	assert.Equal(t, Assertion, state)
 }
 
 func TestIllegal(t *testing.T) {
-	f := Func(
-		`fn add(a:int, b:int) -> int:
- 		end`)
-
 	e := expr(`1>2`)
 	we := ToWithExpression(RightLeftVars(e),
 		"add",
 		[]string{"a", "b"})
-	state := WithExpressionTypeFor(f, we)
+	state := WithExpressionTypeFor(we)
 	assert.Equal(t, Illegal, state)
 }
 
 func TestIllegalFreeVars(t *testing.T) {
-	f := Func(
-		`fn add(a:int, b:int) -> int:
- 		end`)
-
 	e := expr(`a>x`)
 	we := ToWithExpression(RightLeftVars(e),
 		"add",
 		[]string{"a", "b"})
-	state := WithExpressionTypeFor(f, we)
+	state := WithExpressionTypeFor(we)
 	assert.Equal(t, Illegal, state)
 }

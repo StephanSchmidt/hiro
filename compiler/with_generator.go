@@ -33,7 +33,7 @@ type WithExpression struct {
 	RightHasFreeVar   bool
 }
 
-func WithExpressionTypeFor(f *Function, we *WithExpression) WithType {
+func WithExpressionTypeFor(we *WithExpression) WithType {
 	noCalls := !(we.LeftContainsCall || we.RightContainsCall)
 	noVars := !(we.LeftHasVars || we.RightHasVars)
 	onlyRightCall := we.RightContainsCall && !we.LeftContainsCall
@@ -84,6 +84,7 @@ func ToWithExpression(rl *RightLeft, funcName string, vars []string) *WithExpres
 		RightHasFreeVar:   len(funk.SubtractString(rightVars, vars)) > 0,
 		Op:                rl.Op,
 	}
+	we.WithType = WithExpressionTypeFor(we)
 
 	return we
 }
