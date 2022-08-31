@@ -69,8 +69,8 @@ func WithExpressionTypeFor(f *Function, we *WithExpression) WithType {
 }
 
 func ToWithExpression(rl *RightLeft, funcName string, vars []string) *WithExpression {
-	leftVars := funk.Uniq(rl.LeftVars).([]string)
-	rightVars := funk.Uniq(rl.RightVars).([]string)
+	leftVars := funk.UniqString(rl.LeftVars)
+	rightVars := funk.UniqString(rl.RightVars)
 	we := &WithExpression{
 		LeftVars:          leftVars,
 		RightVars:         rightVars,
@@ -78,10 +78,10 @@ func ToWithExpression(rl *RightLeft, funcName string, vars []string) *WithExpres
 		LeftHasVars:       len(leftVars) > 0,
 		LeftContainsCall:  rl.LeftCalls != nil && funk.Contains(rl.LeftCalls, funcName),
 		RightContainsCall: rl.RightCalls != nil && funk.Contains(rl.RightCalls, funcName),
-		LeftContainsVar:   len(funk.Intersect(leftVars, vars).([]string)) > 0,
-		RightContainsVar:  len(funk.Intersect(rightVars, vars).([]string)) > 0,
-		LeftHasFreeVar:    len(funk.Subtract(leftVars, vars).([]string)) > 0,
-		RightHasFreeVar:   len(funk.Subtract(rightVars, vars).([]string)) > 0,
+		LeftContainsVar:   len(funk.IntersectString(leftVars, vars)) > 0,
+		RightContainsVar:  len(funk.IntersectString(rightVars, vars)) > 0,
+		LeftHasFreeVar:    len(funk.SubtractString(leftVars, vars)) > 0,
+		RightHasFreeVar:   len(funk.SubtractString(rightVars, vars)) > 0,
 		Op:                rl.Op,
 	}
 
