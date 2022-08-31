@@ -56,7 +56,8 @@ func WithExpressionTypeFor(f *Function, we *WithExpression) WithType {
 	if noVars && onlyLeftCall {
 		return UnitTest
 	}
-	// add(a,b) == a + b // PropTest
+	// add(a,b) == a + b 	// PropTest
+	// add(a,b) == add(b,a) // PropTest
 	if we.LeftHasVars && we.LeftContainsCall {
 		return PropTest
 	}
