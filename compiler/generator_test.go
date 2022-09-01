@@ -60,7 +60,10 @@ func TestFunctionParse(t *testing.T) {
 }
 
 func formatSource(source string) string {
-	formatted, _ := format.Source([]byte(source))
+	formatted, err := format.Source([]byte(source))
+	if err != nil {
+		panic(err)
+	}
 	return string(formatted)
 }
 
