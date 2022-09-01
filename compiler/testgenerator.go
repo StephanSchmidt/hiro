@@ -37,6 +37,7 @@ func (g *TestGenerator) visitFunction(f *Function) {
 	t.Errorf("Assertion failed: ` + sb.String() + `")
 }
 }`)
+			g.Sb.WriteString("\n")
 		}
 	}
 }

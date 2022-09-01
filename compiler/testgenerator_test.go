@@ -38,3 +38,28 @@ func Test_add_1(t *testing.T) {
 	// 	t.Errorf("Received %v (type %v), expected %v (type %v)", a, reflect.TypeOf(a), b, reflect.TypeOf(b))
 	assert.Equal(t, formatSource(expected), formatSource(GenerateUnitTests(source)))
 }
+
+func TestGenerateTwoUnitTests(t *testing.T) {
+	source := `
+	fn add(a:int, b:int) with
+		add(2,3) == 5,
+        add(0,0) == 0
+		-> int:
+		a + b
+	end
+	`
+	expected := `package main
+import ( "testing" )
+func Test_add_1(t *testing.T) {
+  if ! add(2,3)==5 {
+  	t.Errorf("Assertion failed: add(2,3)==5")
+  }
+}
+func Test_add_2(t *testing.T) {
+  if ! add(0,0)==0 {
+  	t.Errorf("Assertion failed: add(0,0)==0")
+  }
+}`
+	// 	t.Errorf("Received %v (type %v), expected %v (type %v)", a, reflect.TypeOf(a), b, reflect.TypeOf(b))
+	assert.Equal(t, formatSource(expected), formatSource(GenerateUnitTests(source)))
+}
