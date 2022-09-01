@@ -1,0 +1,6 @@
+fn Add(x:int, y:int) with
+    Add(2,3) == 5,
+    Add(0,0) == 0
+    -> int:
+	x+y
+end

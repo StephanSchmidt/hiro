@@ -27,14 +27,7 @@ func TestGenerate(t *testing.T) {
 		a + b
 	end
 	`
-	expected := `
-package main
-
-import (
-	"fmt"
-)
-
-func add(a int, b int) <-chan int {
+	expected := `func add(a int, b int) <-chan int {
 
 	res := make(chan int)
     go func() {
@@ -75,9 +68,7 @@ func TestGenerateAssertion(t *testing.T) {
 		a + b
 	end
 	`
-	expected := `package main
-import ( "fmt" )
-func add(a int, b int) <-chan int {
+	expected := `func add(a int, b int) <-chan int {
 	if !(b > 0) {	
 		panic("Assertion failed: b>0")	
 	}
@@ -87,6 +78,7 @@ func add(a int, b int) <-chan int {
        res <- a + b
     }()
     return res
-}`
+}
+`
 	assert.Equal(t, formatSource(expected), formatSource(Generate(source)))
 }

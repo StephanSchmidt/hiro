@@ -11,7 +11,6 @@ func GenerateUnitTests(source string) string {
 	parser := participle.MustBuild[HiroAst](participle.UseLookahead(2))
 	code, _ := parser.ParseString("", source)
 	var sb strings.Builder
-
 	goGenerator := &TestGenerator{
 		Sb:    &sb,
 		Count: 0,
@@ -28,13 +27,13 @@ func TestGenerateUnitTest(t *testing.T) {
 		a + b
 	end
 	`
-	expected := `package main
-import ( "testing" )
+	expected := `import ( "testing" )
 func Test_add_1(t *testing.T) {
-  if ! add(2,3)==5 {
+  if ! ((<- add(2,3))==5) {
   	t.Errorf("Assertion failed: add(2,3)==5")
   }
-}`
+}
+`
 	// 	t.Errorf("Received %v (type %v), expected %v (type %v)", a, reflect.TypeOf(a), b, reflect.TypeOf(b))
 	assert.Equal(t, formatSource(expected), formatSource(GenerateUnitTests(source)))
 }
@@ -48,18 +47,18 @@ func TestGenerateTwoUnitTests(t *testing.T) {
 		a + b
 	end
 	`
-	expected := `package main
-import ( "testing" )
+	expected := `import ( "testing" )
 func Test_add_1(t *testing.T) {
-  if ! add(2,3)==5 {
+  if ! ((<- add(2,3))==5) {
   	t.Errorf("Assertion failed: add(2,3)==5")
   }
 }
 func Test_add_2(t *testing.T) {
-  if ! add(0,0)==0 {
+  if ! ((<- add(0,0))==0) {
   	t.Errorf("Assertion failed: add(0,0)==0")
   }
-}`
+}
+`
 	// 	t.Errorf("Received %v (type %v), expected %v (type %v)", a, reflect.TypeOf(a), b, reflect.TypeOf(b))
 	assert.Equal(t, formatSource(expected), formatSource(GenerateUnitTests(source)))
 }

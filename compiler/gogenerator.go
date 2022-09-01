@@ -13,8 +13,7 @@ type GoGenerator struct {
 }
 
 func (g *GoGenerator) VisitAst(ast *HiroAst) {
-	g.Sb.WriteString("package main\n\n")
-	g.Sb.WriteString("import (\n\t\"fmt\"\n)\n\n")
+	// g.Sb.WriteString("import (\n\t\"fmt\"\n)\n\n")
 
 	for _, fu := range ast.Functions {
 		g.visitFunction(fu)
