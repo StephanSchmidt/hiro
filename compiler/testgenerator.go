@@ -34,6 +34,10 @@ func HasPropTest(ast *HiroAst) bool {
 }
 
 func (g *TestGenerator) VisitAst(ast *HiroAst) {
+	for _, f := range ast.Functions {
+		AnnotateFunctionWith(f)
+	}
+
 	g.Sb.WriteString(`
 import (`)
 	if HasUnitTest(ast) {

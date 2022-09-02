@@ -72,6 +72,7 @@ func TestGenerateAssertion(t *testing.T) {
 	if !(b > 0) {	
 		panic("Assertion failed: b>0")	
 	}
+
     res := make(chan int)
     go func() {
        defer close(res)

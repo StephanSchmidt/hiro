@@ -27,7 +27,8 @@ func TestGenerateUnitTest(t *testing.T) {
 		a + b
 	end
 	`
-	expected := `import ( "testing" )
+	expected := `
+import ( "testing" )
 func Test_add_1(t *testing.T) {
   if ! ((<- add(2,3))==5) {
   	t.Errorf("Assertion failed: add(2,3)==5")
@@ -47,7 +48,8 @@ func TestGenerateTwoUnitTests(t *testing.T) {
 		a + b
 	end
 	`
-	expected := `import ( "testing" )
+	expected := `
+import ( "testing" )
 func Test_add_1(t *testing.T) {
   if ! ((<- add(2,3))==5) {
   	t.Errorf("Assertion failed: add(2,3)==5")
