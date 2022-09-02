@@ -20,4 +20,4 @@ transpiles the `addexample` to target.
 
 `(cd target; go get -t HiroTesting; go mod vendor; gotestsum ./...)`
 
-runs the tests for the generate Go code.
+runs the tests for the generated Go code.
