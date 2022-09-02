@@ -18,6 +18,6 @@ creates a target for transpiled Go code.
 
 transpiles the `addexample` to target.
 
-`(cd target; go get -t HiroTesting; go mod vendor; gotestsum ./...)`
+`(cd target; go get -t HiroTesting; go mod vendor; go test ./...)`
 
 runs the tests for the generated Go code.
