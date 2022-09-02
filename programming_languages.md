@@ -10,6 +10,7 @@ https://www.infoq.com/articles/ballerina-data-oriented-language/
 https://ballerina.io/
 https://wren.io/
 https://github.com/jesseduffield/OK
+https://crystal-lang.org/
 
 ## Considerations
 
