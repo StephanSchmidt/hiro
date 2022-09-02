@@ -91,7 +91,6 @@ func main() {
 				spew.Dump(hiro)
 				panic(err)
 			} else {
-				// spew.Dump(hiro)
 
 				var sb strings.Builder
 				var symbols = compiler.NewSymbols()
@@ -100,6 +99,24 @@ func main() {
 					Sb:      &sb,
 					Symbols: symbols,
 				}
+
+				mod, err := os.Create(*t + "/go.mod")
+				if err != nil {
+					panic(err)
+				}
+				defer func(f *os.File) {
+					err := f.Close()
+					if err != nil {
+						panic(err)
+					}
+				}(mod)
+				_, err = mod.WriteString(`
+module HiroTesting
+
+go 1.18
+
+require pgregory.net/rapid v0.4.8
+`)
 
 				f, err := os.Create(*t + "/" + sourceName + ".go")
 				if err != nil {

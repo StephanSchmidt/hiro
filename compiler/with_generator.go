@@ -69,6 +69,15 @@ func WithExpressionTypeFor(we *WithExpression) WithType {
 }
 
 func AnnotateFunctionWith(f *Function) {
+	if f.Parsed == nil {
+		f.Parsed = &ParsedFunction{
+			Symbols: make(map[string]string),
+		}
+		for _, arg := range f.Args {
+			f.Parsed.Symbols[arg.VarName] = arg.VarType
+		}
+	}
+
 	vars := funk.Map(f.Args, func(a *Arg) string {
 		return a.VarName
 	}).([]string)

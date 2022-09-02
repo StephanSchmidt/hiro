@@ -60,7 +60,8 @@ func (g *GoGenerator) visitFunction(f *Function) {
 				//g.Sb.WriteString(`a > 0`)
 				g.Sb.WriteString(`) {
   panic("Assertion failed: ` + sb.String() + `")
- }`)
+ }
+`)
 			}
 		}
 		g.Sb.WriteString(fmt.Sprintf("\n res := make(chan %s)\n go func() {\n defer close(res)\n", f.Return))

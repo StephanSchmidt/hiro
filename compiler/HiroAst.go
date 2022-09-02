@@ -11,6 +11,10 @@ type HiroAst struct {
 	Functions []*Function `@@*`
 }
 
+type ParsedFunction struct {
+	Symbols map[string]string
+}
+
 type Function struct {
 	Name   string     `"fn" @Ident`
 	Args   []*Arg     `"(" ( @@ ( "," @@ )* )? ")"`
@@ -18,6 +22,8 @@ type Function struct {
 	Return string     `("-" ">" @Ident)? ":"`
 	Body   []*Command `((?! 'end') @@)*`
 	End    bool       `@"end"`
+
+	Parsed *ParsedFunction
 }
 
 type With struct {

@@ -1,6 +1,7 @@
 fn Add(x:int, y:int) with
     Add(2,3) == 5,
-    Add(0,0) == 0
+    Add(0,0) == 0,
+    Add(x,y) == Add(y,x)
     -> int:
 	x+y
 end
